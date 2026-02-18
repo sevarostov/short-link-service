@@ -2,6 +2,7 @@
 
 namespace tests\unit\services;
 
+use app\models\Link;
 use app\services\LinkService;
 use Codeception\Test\Unit;
 use Endroid\QrCode\QrCode;
@@ -18,7 +19,7 @@ class LinkServiceTest extends Unit
 	protected function _before()
 	{
 		$this->linkService = new LinkService();
-		$this->url = 'https://site.com';
+		$this->url = 'https://svetlana-kartysh.ru';
 	}
 
 	/**
@@ -80,7 +81,7 @@ class LinkServiceTest extends Unit
 	public function testGenerateQrCodeReturnsValidDataUrl()
 	{
 
-		$result =  $this->linkService->generateQrCode($this->url);
+		$result = $this->linkService->generateQrCode($this->url);
 
 		$this->assertStringStartsWith('data:image/png;base64,', $result);
 		$base64Part = substr($result, strlen('data:image/png;base64,'));
@@ -93,7 +94,21 @@ class LinkServiceTest extends Unit
 	 */
 	public function testSaveLinkInDatabase()
 	{
+		$link = Link::findOne(['host' => $this->url]);
+		if ($link) {
+			$link->delete();
+		}
+
 		$link = $this->linkService->save($this->url);
 		$this->assertTrue(!$link->getErrors());
+	}
+
+	/**
+	 * Test saving model data
+	 */
+	public function testCheckResourceAvailability()
+	{
+		$response = $this->linkService->checkResourceAvailability($this->url);
+		$this->assertTrue($response['success']);
 	}
 }

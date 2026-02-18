@@ -3,8 +3,10 @@
 namespace app\controllers\api;
 
 use app\models\Link;
+use app\services\LinkService;
 use Exception;
 use Yii;
+use yii\helpers\ArrayHelper;
 use yii\rest\ActiveController;
 use yii\web\Response;
 
@@ -40,6 +42,7 @@ class LinkController extends ActiveController
 	/**
 	 * Finds existing link by ID
 	 * (GET /api/link/<id>)
+	 *
 	 * @param $id
 	 *
 	 * @return void

@@ -45,7 +45,12 @@ $(document).ready(function () {
 					msg = response.responseJSON.message;
 				}
 				
-				if (typeof msg === "object" && msg.toString().substring(0, 12) === 'Original URL') {
+				if (typeof msg === "object"
+					&& (
+						(msg.toString() === 'Original URL "' + url + '" has already been taken.') ||
+						(msg.toString() === 'Original URL "https://' + url + '" has already been taken.')
+					)
+				) {
 					let host = url.substring(0, 8);
 					
 					$.ajax({
@@ -55,11 +60,12 @@ $(document).ready(function () {
 						dataType: 'json',
 						success: function (response) {
 							
-							if (response.host) {
+							if (response !== null && response.host) {
 								$('#shortLinkOutput').val(response.short);
 								$('#qrCodeContainer').html(`<img src="${response.qr_code}" alt="QR Code" style="max-width: 200px;">`);
 								$('#resultContainer').removeClass('d-none');
-							} else {
+							} else if (response !== null && response.message) {
+								
 								$('#errorContainer')
 									.text(response.message || 'An error occurred.')
 									.removeClass('d-none');

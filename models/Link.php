@@ -5,7 +5,6 @@ namespace app\models;
 use app\services\LinkService;
 use Exception;
 use Yii;
-use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
 
@@ -38,7 +37,7 @@ class Link extends ActiveRecord
 		return [
 			// Required fields
 			[['host'], 'required'],
-
+			['host', 'checkResourceAvailability'],
 			// String length limits
 			['host', 'string', 'max' => 255],
 			['short', 'string', 'max' => 255],
@@ -91,7 +90,9 @@ class Link extends ActiveRecord
 	}
 
 	/**
-	 * Before saving, ensure the short code is properly formatted.
+	 * Before saving, ensure host is available
+	 *
+	 * the short code && qr_code generated
 	 * @return bool
 	 */
 	public function beforeSave($insert)
@@ -99,7 +100,7 @@ class Link extends ActiveRecord
 		if (parent::beforeSave($insert)) {
 
 			$this->host = trim($this->host);
-			$this->short = ($linkService = (new LinkService()))->generateShortCode();
+			$this->short = ($linkService = new LinkService())->generateShortCode();
 			$this->qr_code = $linkService->generateQrCode($this->host);
 
 			return true;
@@ -119,7 +120,25 @@ class Link extends ActiveRecord
 		$query->andFilterWhere([
 			'host' => ArrayHelper::getValue($params, 'host'),
 		]);
+		$query->orFilterWhere([
+			'host' => 'https://' . ArrayHelper::getValue($params, 'host'),
+		]);
 		return $query->one();
+	}
+
+	/**
+	 * @return void
+	 */
+	public function checkResourceAvailability()
+	{
+		$response = (new LinkService())
+			->checkResourceAvailability($this->host);
+		if (!$response['success']) {
+			$this->addError('host', sprintf(
+				'Resource "%s" Is Not Available!',
+				$this->host,
+			));
+		}
 	}
 
 }
