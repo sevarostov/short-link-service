@@ -7,7 +7,7 @@ This is a Yii 2‑based web application serving as Short Link Service + QR.
 [Yii 2](https://www.yiiframework.com/)
 [docker](https://www.docker.com/)
 [PHP: 8.4.*](https://www.php.net/releases/8.4/en.php)
-[Database: MySQL 9.0](https://mysql.com)
+[Database: MySQL 9.6.0](https://mysql.com)
 
 
 INSTALLATION
@@ -30,7 +30,15 @@ cp .env.example .env.dev
 
 ### Start the containers with Docker
 ```
-    docker-compose up -d
+    docker compose up -d
 ```
 
+### Run migrations
+```
+    docker compose run --rm php yii migrate
+```
+
+
+### Visit the site
+http://localhost:8000
 
