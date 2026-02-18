@@ -1,6 +1,7 @@
 .env
 docker/
 config/db.php
+config/test_db.php
 
 # phpstorm project files
 .idea

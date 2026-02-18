@@ -8,6 +8,7 @@
 
 namespace app\commands;
 
+use Yii;
 use yii\console\Controller;
 use yii\console\ExitCode;
 
@@ -21,15 +22,69 @@ use yii\console\ExitCode;
  */
 class HelloController extends Controller
 {
-    /**
-     * This command echoes what you have entered as the message.
-     * @param string $message the message to be echoed.
-     * @return int Exit code
-     */
-    public function actionIndex($message = 'hello world')
-    {
-        echo $message . "\n";
+	/**
+	 * List of routes command.
+	 *
+	 *
+	 * @return int Exit code
+	 */
+	public function actionIndex()
+	{
+		$paths = [];
+		$routes = [];
 
-        return ExitCode::OK;
-    }
+		$modules = Yii::$app->Modules;
+		foreach ($modules as $key => $value) {
+			array_push($routes, $key);
+			if ($key !== 'debug' && $key !== 'gii') {
+				$class = new \ReflectionClass($value['class']);
+				$paths[] = substr($class->getFileName(), 0, strrpos($class->getFileName(), '/')) . '/controllers';
+			}
+		}
+		array_push($paths, dirname(__DIR__) . '/controllers');
+
+		foreach ($paths as $path) {
+			$controllerlist = [];
+			if ($handle = scandir($path)) {
+				foreach ($handle as $file) {
+					if (
+						($file != "." && $file != ".." && substr($file, strrpos($file, '.') - 10) == 'Controller.php')
+						|| ($file === 'api')
+					) {
+						if ($file !== 'api') {
+							$controllerlist[] = $file;
+						} else {
+							$handle = scandir(dirname(__DIR__) . '/controllers/' . $file);
+							foreach ($handle as $file) {dump($file);
+								if ($file != "." && $file != ".." && substr($file, strrpos($file, '.') - 10) == 'Controller.php') {
+									$controllerlist[] = 'api/'.$file;
+								}
+							}
+						}
+					}
+				}
+			}
+
+			foreach ($controllerlist as $controller) {
+				array_push($routes, lcfirst(substr($controller, 0, -14)));
+				$handle = fopen($path . '/' . $controller, "r");
+				if ($handle) {
+					while (($line = fgets($handle)) !== false) {
+						if (preg_match('/public function action(.*?)\(/', $line, $display)) {
+							if (strlen($display[1]) > 2) {
+								array_push($routes, strtolower($display[1]));
+							}
+						}
+					}
+				}
+				fclose($handle);
+			}
+		}
+
+		$routes = array_unique($routes);
+
+		var_dump($routes);
+
+		return ExitCode::OK;
+	}
 }
