@@ -46,16 +46,18 @@ $this->registerJsFile(
 					<div id="resultContainer" class="d-none">
 						<hr>
 						<h5 class="mb-3">Your Short Link:</h5>
-						<div class="input-group mb-3">
-							<input
-									type="text"
-									class="form-control"
-									id="shortLinkOutput"
-									readonly
+						<div class="mb-3">
+							<a
+									href="#"
+									class="btn btn-outline-primary w-100 text-start"
+									id="shortLinkButton"
+									target="_blank"
+									rel="noopener"
+									style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"
+									title="Click to open the short link"
 							>
-							<button class="btn btn-outline-secondary" type="button" id="copyBtn">
-								Copy
-							</button>
+								Short Link (not generated yet)
+							</a>
 						</div>
 
 						<div class="text-center">

@@ -5,9 +5,6 @@ namespace tests\unit\services;
 use app\models\Link;
 use app\services\LinkService;
 use Codeception\Test\Unit;
-use Endroid\QrCode\QrCode;
-use Endroid\QrCode\Writer\PngWriter;
-use Yii;
 
 class LinkServiceTest extends Unit
 {

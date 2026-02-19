@@ -3,11 +3,12 @@
 namespace app\controllers\api;
 
 use app\models\Link;
-use app\services\LinkService;
+use app\services\UserIpService;
+use app\services\UserIpLinkLogService;
 use Exception;
 use Yii;
-use yii\helpers\ArrayHelper;
 use yii\rest\ActiveController;
+use yii\web\JsonResponseFormatter;
 use yii\web\Response;
 
 class LinkController extends ActiveController
@@ -59,6 +60,40 @@ class LinkController extends ActiveController
 	 */
 	public function actionSearch(): ?Link
 	{
-		return (new Link())->searchByHost(Yii::$app->request->queryParams);
+		return (new Link())->searchBy(Yii::$app->request->queryParams, 'host');
+	}
+
+	/**
+	 * Finds existing link by short
+	 * (GET /api/link/visit?short=53de59)
+	 *
+	 * @throws Exception
+	 */
+	public function actionVisit()
+	{
+		$link = (new Link())->searchBy(Yii::$app->request->queryParams, 'short');
+
+		if (!$link) {
+			return new Response(['data' => "Link Not Found", 'statusCode' => 404]);
+		}
+
+		$db = Yii::$app->db;
+		$transaction = $db->beginTransaction();
+		try {
+			
+			$userIp = (new UserIpService())->saveUserIp(Yii::$app->request->userIP);
+			(new UserIpLinkLogService())->log($userIp, $link);
+			$link->incrementCounter();
+			$transaction->commit();
+
+			return Yii::$app->response->redirect($link->host, 302);
+
+		} catch (Exception $e) {
+
+			$transaction->rollBack();
+			Yii::error('Error processing link visit: ' . $e->getMessage());
+
+			return Yii::$app->response->redirect(array('site/index'));
+		}
 	}
 }

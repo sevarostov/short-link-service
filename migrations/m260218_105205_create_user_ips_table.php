@@ -3,23 +3,23 @@
 use yii\db\Migration;
 
 /**
- * Handles the creation of table `{{%user_agents}}`.
+ * Handles the creation of table `{{%user_ips}}`.
  */
-class m260218_105205_create_user_agents_table extends Migration
+class m260218_105205_create_user_ips_table extends Migration
 {
     /**
      * {@inheritdoc}
      */
     public function safeUp()
     {
-        $this->createTable('{{%user_agents}}', [
+        $this->createTable('{{%user_ips}}', [
             'id' => $this->primaryKey()->unsigned(),
-			'ip' => $this->string(100)->notNull()->comment('Юзер агент пользователя'),
+			'ip' => $this->string(100)->notNull()->comment('IP'),
 			'created_at' => $this->dateTime()->notNull()->defaultExpression('CURRENT_TIMESTAMP'),
 			'updated_at' => $this->timestamp()->null()->defaultExpression('NULL ON UPDATE CURRENT_TIMESTAMP'),
         ]);
 
-		$this->createIndex('idx_ip', '{{%user_agents}}', 'ip');
+		$this->createIndex('idx_ip', '{{%user_ips}}', 'ip');
     }
 
     /**
@@ -27,6 +27,6 @@ class m260218_105205_create_user_agents_table extends Migration
      */
     public function safeDown()
     {
-        $this->dropTable('{{%user_agents}}');
+        $this->dropTable('{{%user_ips}}');
     }
 }

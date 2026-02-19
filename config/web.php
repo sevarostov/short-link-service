@@ -57,6 +57,7 @@ $config = [
 					'except' => ['delete', 'update'],
 					'extraPatterns' => [
 						'GET search' => 'search',
+						'GET visit' => 'visit',
 					],
 				],
 			],

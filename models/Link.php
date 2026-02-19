@@ -5,6 +5,7 @@ namespace app\models;
 use app\services\LinkService;
 use Exception;
 use Yii;
+use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
 
@@ -18,6 +19,9 @@ use yii\helpers\ArrayHelper;
  * @property int $counter
  * @property string $created_at
  * @property string|null $updated_at
+ *
+ * Related models
+ * @property UserIpLinkLog[] $visitLogs
  */
 class Link extends ActiveRecord
 {
@@ -109,36 +113,51 @@ class Link extends ActiveRecord
 	}
 
 	/**
-	 * @param $params
+	 * @param array $params
+	 * @param string $field
 	 *
 	 * @return Link|null
 	 * @throws Exception
 	 */
-	public function searchByHost($params): Link|null
+	public function searchBy(array $params, string $field): Link|null
 	{
 		$query = parent::find();
-		$query->andFilterWhere([
-			'host' => ArrayHelper::getValue($params, 'host'),
-		]);
-		$query->orFilterWhere([
-			'host' => 'https://' . ArrayHelper::getValue($params, 'host'),
-		]);
+
+		match ($field) {
+			'host' => $query
+				->andFilterWhere([$field => ArrayHelper::getValue($params, $field),])
+				->orFilterWhere([$field => 'https://' . ArrayHelper::getValue($params, $field),]),
+			'short' => $query
+				->andFilterWhere([$field => ArrayHelper::getValue($params, $field)]),
+		};
+
 		return $query->one();
 	}
 
 	/**
 	 * @return void
 	 */
-	public function checkResourceAvailability()
+	public function checkResourceAvailability(): void
 	{
 		$response = (new LinkService())
 			->checkResourceAvailability($this->host);
 		if (!$response['success']) {
-			$this->addError('host', sprintf(
-				'Resource "%s" Is Not Available!',
-				$this->host,
-			));
+			$this->addError('host', 'Данный URL недоступен!');
 		}
 	}
 
+	public function getVisitLogs(): ActiveQuery
+	{
+		return $this->hasMany(UserIpLinkLog::class, ['link_id' => 'id']);
+	}
+
+	/**
+	 * Gets the total number of visits for this link.
+	 *
+	 * @return int Number of visits
+	 */
+	public function getVisitCount(): int
+	{
+		return (int)$this->getVisitLogs()->count();
+	}
 }

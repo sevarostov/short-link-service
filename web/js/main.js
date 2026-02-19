@@ -25,7 +25,10 @@ $(document).ready(function () {
 			dataType: 'json',
 			success: function (response) {
 				if (response.host) {
-					$('#shortLinkOutput').val(response.short);
+					$('#shortLinkButton')
+						.attr('href', '/api/link/visit?short='+ response.short)
+						.text('https://' + response.short)
+						.removeClass('d-none');
 					$('#qrCodeContainer').html(`<img src="${response.qr_code}" alt="QR Code" style="max-width: 200px;">`);
 					$('#resultContainer').removeClass('d-none');
 				} else {
@@ -59,9 +62,11 @@ $(document).ready(function () {
 						data: {host: url},
 						dataType: 'json',
 						success: function (response) {
-							
 							if (response !== null && response.host) {
-								$('#shortLinkOutput').val(response.short);
+								$('#shortLinkButton')
+									.attr('href', response.host)
+									.text('https://' + response.short)
+									.removeClass('d-none');
 								$('#qrCodeContainer').html(`<img src="${response.qr_code}" alt="QR Code" style="max-width: 200px;">`);
 								$('#resultContainer').removeClass('d-none');
 							} else if (response !== null && response.message) {
@@ -83,13 +88,5 @@ $(document).ready(function () {
 				$btn.prop('disabled', false).text('OK');
 			}
 		});
-	});
-	
-	// Copy to clipboard
-	$('#copyBtn').on('click', function () {
-		const input = $('#shortLinkOutput');
-		input.select();
-		document.execCommand('copy');
-		alert('Short link copied to clipboard!');
 	});
 });
