@@ -42,3 +42,7 @@ cp .env.example .env.dev
 ### Visit the site
 http://localhost:8000
 
+### Run tests
+```
+docker compose exec php ./vendor/bin/codecept run unit
+```

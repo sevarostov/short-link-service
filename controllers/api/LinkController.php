@@ -8,7 +8,6 @@ use app\services\UserIpLinkLogService;
 use Exception;
 use Yii;
 use yii\rest\ActiveController;
-use yii\web\JsonResponseFormatter;
 use yii\web\Response;
 
 class LinkController extends ActiveController
@@ -80,7 +79,7 @@ class LinkController extends ActiveController
 		$db = Yii::$app->db;
 		$transaction = $db->beginTransaction();
 		try {
-			
+
 			$userIp = (new UserIpService())->saveUserIp(Yii::$app->request->userIP);
 			(new UserIpLinkLogService())->log($userIp, $link);
 			$link->incrementCounter();
